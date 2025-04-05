@@ -187,8 +187,8 @@ func setTCPUserTimeout(d time.Duration) func(string, string, syscall.RawConn) er
 				#define TCP_USER_TIMEOUT	 18 // How long for loss retry before timeout
 			*/
 
-			sysErr = syscall.SetsockoptInt(int(fd), syscall.SOL_TCP, 0x12,
-				int(d.Milliseconds()))
+			//sysErr = syscall.SetsockoptInt(int(fd), syscall.SOL_TCP, 0x12,
+			//	int(d.Milliseconds()))
 		})
 		if sysErr != nil {
 			return os.NewSyscallError("setsockopt", sysErr)
@@ -216,7 +216,7 @@ func NewInstanceConn(host string, availabilityZone string, shardname string, tls
 		Timeout:   timeout,
 		KeepAlive: keepAlive,
 
-		Control: setTCPUserTimeout(tcpUserTimeout),
+		// Control: setTCPUserTimeout(tcpUserTimeout),
 	}
 
 	// assuming here host is in the form of hostname:port

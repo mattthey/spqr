@@ -52,12 +52,12 @@ build_spqrdump:
 build: build_balancer build_coordinator build_coorctl build_router build_mover build_worldmock build_workloadreplay build_spqrdump
 
 build_images:
-	docker-compose build spqr-base-image
+	docker compose build spqr-base-image
 	@if [ "x" != "${POSTGRES_VERSION}x" ]; then\
 		echo "building ${POSTGRES_VERSION} version";\
-		docker-compose build --build-arg POSTGRES_VERSION=${POSTGRES_VERSION} --build-arg codename=${codename} spqr-shard-image;\
+		docker compose build --build-arg POSTGRES_VERSION=${POSTGRES_VERSION} --build-arg codename=${codename} spqr-shard-image;\
 	else\
-		docker-compose build --build-arg codename=${codename} spqr-shard-image;\
+		docker compose build --build-arg codename=${codename} spqr-shard-image;\
 	fi
 
 save_shard_image:

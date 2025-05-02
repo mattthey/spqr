@@ -1,0 +1,1 @@
+psql "postgresql://usr:pswd@localhost:5431/postgres"

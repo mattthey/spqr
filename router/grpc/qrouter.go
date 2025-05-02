@@ -497,9 +497,9 @@ func (l *LocalQrouterServer) DropSequence(ctx context.Context, request *protos.D
 }
 
 // todo : unit tests
-func (l LocalQrouterServer) Create2PhaseCommit(context.Context, *protos.CreateTwoPCRequest) (*protos.CreateTwoPCReply, error) {
+func (l LocalQrouterServer) Create2PhaseCommit(context.Context, *protos.TwoPCRequest) (*protos.CreateTwoPCReply, error) {
 	return &protos.CreateTwoPCReply{
-		Err: "",
+		Lease: "T",
 	}, nil
 }
 

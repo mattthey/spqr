@@ -1,0 +1,1 @@
+psql "host=localhost sslmode=disable user=usr dbname=postgres port=7433"

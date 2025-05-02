@@ -2,8 +2,10 @@ package provider
 
 import (
 	"context"
+
 	"github.com/pg-sharding/spqr/coordinator"
 	protos "github.com/pg-sharding/spqr/pkg/protos"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func NewTwoPCServer(impl coordinator.Coordinator) *TwoPCService {
@@ -18,11 +20,16 @@ type TwoPCService struct {
 	impl coordinator.Coordinator
 }
 
-func (t TwoPCService) Create2PhaseCommit(context.Context, *protos.CreateTwoPCReply) (*protos.CreateTwoPCReply, error) {
+func (t TwoPCService) Create2PhaseCommit(context.Context, *protos.TwoPCRequest) (*protos.CreateTwoPCReply, error) {
 	// todo доделать, чтобы координатор сохранях инфу в etcd
 	return &protos.CreateTwoPCReply{
-		Err: "",
+		Lease: "",
 	}, nil
+}
+
+func (t TwoPCService) Update2PhaseCommitStatus(context.Context, *protos.TwoPCRequest) (*emptypb.Empty, error) {
+	// todo доделать, чтобы координатор сохранях инфу в etcd
+	return nil, nil
 }
 
 var _ protos.TwoPCServiceServer = &TwoPCService{}

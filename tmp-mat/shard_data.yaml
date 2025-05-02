@@ -1,0 +1,19 @@
+shards:
+  sh1:
+    db: postgres
+    usr: usr
+    pwd: pswd
+    type: DATA
+    tls:
+      sslmode: disable
+    hosts:
+      - 'localhost:5431'
+  sh2:
+    db: postgres
+    usr: usr
+    pwd: pswd
+    type: DATA
+    tls:
+      sslmode: disable
+    hosts:
+      - 'localhost:5430'

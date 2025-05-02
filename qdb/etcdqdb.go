@@ -64,12 +64,17 @@ const (
 	transactionNamespace           = "/transfer_txs/"
 	sequenceNamespace              = "/sequences/"
 	columnSequenceMappingNamespace = "/column_sequence_mappings/"
+	twoPhaseCommits          = "/2p_commits/"
 
 	CoordKeepAliveTtl = 3
 	keyspace          = "key_space"
 	coordLockKey      = "coordinator_exists"
 	sequenceSpace     = "sequence_space"
 )
+
+func twoPhaseCommitPath(key string) string {
+	return path.Join(twoPhaseCommits, key)
+}
 
 func keyLockPath(key string) string {
 	return path.Join("/lock", key)
@@ -116,6 +121,41 @@ func relationSequenceMappingNodePath(relName string) string {
 }
 func columnSequenceMappingNodePath(relName, colName string) string {
 	return path.Join(relationSequenceMappingNodePath(relName), colName)
+}
+
+func (q *EtcdQDB) Create2phaseCommit(ctx context.Context, txId string, shards []string) error {
+	spqrlog.Zero.Debug().
+		Interface("two-phase-commit", txId).
+		Msg("etcdqdb: two-phase-commit " + txId)
+
+	resp, err := q.cli.Put(ctx, twoPhaseCommitPath(txId), strings.Join(shards, "|"))
+	if err != nil {
+		return err
+	}
+
+	spqrlog.Zero.Debug().
+		Interface("two-phase-commit", resp).
+		Msg("etcdqdb: put key range to qdb")
+
+	return err
+}
+
+func (q *EtcdQDB) GetAll2phaseCommits(ctx context.Context) (*map[string][]string, error) {
+	spqrlog.Zero.Debug().
+		Interface("two-phase-commit", "GetAll2phaseCommits").
+		Msg("etcdqdb: two-phase-commit")
+
+	resp, err := q.cli.Get(ctx, twoPhaseCommits)
+	if err != nil {
+		return nil, err
+	}
+
+	spqrlog.Zero.Debug().
+		Interface("two-phase-commit", resp).
+		Msg("etcdqdb: put key range to qdb")
+
+	var response = make(map[string][]string)
+	return &response, err
 }
 
 // ==============================================================================

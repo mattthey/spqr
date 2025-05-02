@@ -47,6 +47,8 @@ type DistributedXactKepper interface {
 * implementation to keep the distributed state in sync.
  */
 type QDB interface {
+	Create2phaseCommit(ctx context.Context, txId string, shards []string) error
+	GetAll2phaseCommits(ctx context.Context) (*map[string][]string, error)
 	CreateKeyRange(ctx context.Context, keyRange *KeyRange) error
 	GetKeyRange(ctx context.Context, id string) (*KeyRange, error)
 	UpdateKeyRange(ctx context.Context, keyRange *KeyRange) error

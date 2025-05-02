@@ -2,6 +2,7 @@ package coord
 
 import (
 	"context"
+	"errors"
 
 	"github.com/pg-sharding/spqr/pkg/config"
 	"github.com/pg-sharding/spqr/pkg/meta"
@@ -989,4 +990,29 @@ func (a *Adapter) NextVal(ctx context.Context, seqName string) (int64, error) {
 		return -1, err
 	}
 	return resp.Value, err
+}
+
+func (a *Adapter) Create2PhaseCommit(txid string, msg string) error {
+	c := proto.NewTwoPCServiceClient(a.conn)
+	resp, err := c.Create2PhaseCommit(context.Background(), &proto.CreateTwoPCRequest{
+		Txid: txid,
+		Msg:  msg,
+	})
+	if err != nil {
+		return err
+	}
+
+	if resp.Err != "" {
+		return errors.New(resp.Err)
+	}
+
+	return nil
+}
+
+func (a *Adapter) GetAll2PhaseCommits() (map[string][]string, error) {
+	return nil, nil
+}
+
+func (a *Adapter) Delete2PhaseCommit(txid string, msg string) error {
+	return nil
 }

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package spqr;
+
+option go_package = "spqr/proto";
+
+import "google/protobuf/empty.proto";
+
+service TwoPCService {
+  rpc Create2PhaseCommit(TwoPCRequest) returns (CreateTwoPCReply) {};
+  rpc Update2PhaseCommitStatus(TwoPCRequest) returns(google.protobuf.Empty) {};
+}
+
+message TwoPCRequest {
+  string txid = 1;
+  string status = 2;
+}
+
+message CreateTwoPCReply {
+  string lease = 1;
+}

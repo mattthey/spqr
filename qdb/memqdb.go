@@ -128,6 +128,15 @@ func (q *MemQDB) DumpState() error {
 	return nil
 }
 
+func (q *MemQDB) Create2phaseCommit(ctx context.Context, txId string, shards []string) error {
+	return nil
+}
+
+func (q *MemQDB) GetAll2phaseCommits(ctx context.Context) (*map[string][]string, error) {
+	// TODO implement
+	return nil, nil
+}
+
 // ==============================================================================
 //                               KEY RANGE MOVES
 // ==============================================================================

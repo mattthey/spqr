@@ -640,6 +640,18 @@ func (lc *LocalCoordinator) RetryMoveTaskGroup(_ context.Context) error {
 	return ErrNotCoordinator
 }
 
+func (a *LocalCoordinator) Create2PhaseCommit(txid string, msg string) error {
+	return nil
+}
+
+func (a *LocalCoordinator) GetAll2PhaseCommits() (map[string][]string, error) {
+	return nil, nil
+}
+
+func (a *LocalCoordinator) Delete2PhaseCommit(txid string, msg string) error {
+	return nil
+}
+
 // NewLocalCoordinator creates a new LocalCoordinator instance.
 //
 // Parameters:

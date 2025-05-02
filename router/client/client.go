@@ -29,7 +29,6 @@ import (
 	"github.com/pg-sharding/spqr/router/port"
 	"github.com/pg-sharding/spqr/router/route"
 	"github.com/pg-sharding/spqr/router/server"
-	"github.com/pg-sharding/spqr/router/twopc"
 )
 
 type RouterClient interface {
@@ -317,7 +316,9 @@ func NewPsqlClient(pgconn conn.RawConn, pt port.RouterPortType, defaultRouteBeha
 		serverP: atomic.Pointer[server.Server]{},
 	}
 
-	cl.SetCommitStrategy(false, twopc.COMMIT_STRATEGY_BEST_EFFORT)
+	// fixme cycle import
+	//cl.SetCommitStrategy(false, twopc.COMMIT_STRATEGY_BEST_EFFORT)
+	cl.SetCommitStrategy(false, "best-effort")
 
 	cl.serverP.Store(nil)
 

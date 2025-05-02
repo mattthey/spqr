@@ -33,6 +33,7 @@ type LocalQrouterServer struct {
 	protos.UnimplementedMoveTasksServiceServer
 	protos.UnimplementedShardServiceServer
 	protos.UnimplementedBalancerTaskServiceServer
+	protos.UnimplementedTwoPCServiceServer
 	qr  qrouter.QueryRouter
 	mgr meta.EntityMgr
 	rr  rulerouter.RuleRouter
@@ -495,6 +496,13 @@ func (l *LocalQrouterServer) DropSequence(ctx context.Context, request *protos.D
 	return nil, err
 }
 
+// todo : unit tests
+func (l LocalQrouterServer) Create2PhaseCommit(context.Context, *protos.CreateTwoPCRequest) (*protos.CreateTwoPCReply, error) {
+	return &protos.CreateTwoPCReply{
+		Err: "",
+	}, nil
+}
+
 func Register(server reflection.GRPCServer, qrouter qrouter.QueryRouter, mgr meta.EntityMgr, rr rulerouter.RuleRouter) {
 
 	lqr := &LocalQrouterServer{
@@ -515,6 +523,7 @@ func Register(server reflection.GRPCServer, qrouter qrouter.QueryRouter, mgr met
 	protos.RegisterDistributionServiceServer(server, lqr)
 	protos.RegisterMoveTasksServiceServer(server, lqr)
 	protos.RegisterBalancerTaskServiceServer(server, lqr)
+	protos.RegisterTwoPCServiceServer(server, lqr)
 }
 
 var _ protos.KeyRangeServiceServer = &LocalQrouterServer{}
@@ -527,3 +536,4 @@ var _ protos.DistributionServiceServer = &LocalQrouterServer{}
 var _ protos.MoveTasksServiceServer = &LocalQrouterServer{}
 var _ protos.BalancerTaskServiceServer = &LocalQrouterServer{}
 var _ protos.ShardServiceServer = &LocalQrouterServer{}
+var _ protos.TwoPCServiceServer = &LocalQrouterServer{}

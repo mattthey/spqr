@@ -2090,3 +2090,15 @@ func (qc *QDBCoordinator) finishMoveTasksInProgress(ctx context.Context) error {
 func (qc *QDBCoordinator) IsReadOnly() bool {
 	return !qc.acquiredLock
 }
+
+func (a *QDBCoordinator) Create2PhaseCommit(txid string, msg string) error {
+	return nil
+}
+
+func (a *QDBCoordinator) GetAll2PhaseCommits() (map[string][]string, error) {
+	return nil, nil
+}
+
+func (a *QDBCoordinator) Delete2PhaseCommit(txid string, msg string) error {
+	return nil
+}

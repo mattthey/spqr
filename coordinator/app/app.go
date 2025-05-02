@@ -151,6 +151,7 @@ func (app *App) ServeGrpcApi(wg *sync.WaitGroup) error {
 	shardServ := provider.NewShardServer(app.coordinator)
 	dsServ := provider.NewDistributionServer(app.coordinator)
 	tasksServ := provider.NewTasksServer(app.coordinator)
+	twoPCServ := provider.NewTwoPCServer(app.coordinator)
 	protos.RegisterKeyRangeServiceServer(serv, krServ)
 	protos.RegisterRouterServiceServer(serv, rrServ)
 	protos.RegisterTopologyServiceServer(serv, topServ)
@@ -158,6 +159,7 @@ func (app *App) ServeGrpcApi(wg *sync.WaitGroup) error {
 	protos.RegisterDistributionServiceServer(serv, dsServ)
 	protos.RegisterMoveTasksServiceServer(serv, tasksServ)
 	protos.RegisterBalancerTaskServiceServer(serv, tasksServ)
+	protos.RegisterTwoPCServiceServer(serv, twoPCServ)
 
 	address := net.JoinHostPort(config.CoordinatorConfig().Host, config.CoordinatorConfig().GrpcApiPort)
 	listener, err := net.Listen("tcp", address)

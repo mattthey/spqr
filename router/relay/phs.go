@@ -3,6 +3,7 @@ package relay
 import (
 	"context"
 	"fmt"
+	"github.com/pg-sharding/spqr/qdb"
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgproto3"
@@ -114,13 +115,13 @@ func (s *QueryStateExecutorImpl) ExecBegin(rst RelayStateMgr, query string, st *
 	return rst.Client().ReplyCommandComplete("BEGIN")
 }
 
-func (s *QueryStateExecutorImpl) ExecCommitTx(query string) error {
+func (s *QueryStateExecutorImpl) ExecCommitTx(query string, qdb qdb.QDB) error {
 	spqrlog.Zero.Debug().Uint("client", s.cl.ID()).Str("commit strategy", s.cl.CommitStrategy()).Msg("execute commit")
 
 	serv := s.cl.Server()
 
 	if s.cl.CommitStrategy() == twopc.COMMIT_STRATEGY_2PC && len(serv.Datashards()) > 1 {
-		if err := twopc.ExecuteTwoPhaseCommit(s.cl.ID(), serv); err != nil {
+		if err := twopc.ExecuteTwoPhaseCommit(s.cl.ID(), serv, qdb); err != nil {
 			return err
 		}
 	} else {
@@ -144,8 +145,18 @@ func (s *QueryStateExecutorImpl) ExecCommit(rst RelayStateMgr, query string) err
 		return nil
 	}
 
-	if err := s.ExecCommitTx(query); err != nil {
-		return err
+	spqrlog.Zero.Debug().Uint("client", s.cl.ID()).Str("commit strategy", s.cl.CommitStrategy()).Msg("execute commit")
+
+	if s.cl.CommitStrategy() == twopc.COMMIT_STRATEGY_2PC && len(s.Client().Server().Datashards()) > 1 {
+		qdb := rst.QueryRouter().Mgr().QDB()
+		if err := twopc.ExecuteTwoPhaseCommit(s.cl.ID(), s.Client().Server(), qdb); err != nil {
+			return err
+		}
+	} else {
+		if err := s.deployTxStatusInternal(s.Client().Server(),
+			&pgproto3.Query{String: query}, txstatus.TXIDLE); err != nil {
+			return err
+		}
 	}
 
 	rst.Client().CommitActiveSet()
@@ -608,7 +619,7 @@ func (s *QueryStateExecutorImpl) ProcQuery(qd *QueryDesc, mgr meta.EntityMgr, wa
 						} else {
 							if doFinalizeTx {
 								if txt == txstatus.TXACT {
-									return s.ExecCommitTx("COMMIT")
+									return s.ExecCommitTx("COMMIT", mgr.QDB())
 								} else {
 									return s.ExecRollbackServer()
 								}

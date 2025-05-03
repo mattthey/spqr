@@ -1,1 +1,1 @@
-psql "host=localhost sslmode=disable user=usr dbname=postgres port=6432" -f ./tmp-mat/scripts/2pc.sql
+psql "postgresql://user1:pswd@localhost:6432/db1" -f ./tmp-mat/scripts/2pc.sql

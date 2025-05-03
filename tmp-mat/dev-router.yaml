@@ -4,20 +4,20 @@ log_level: debug
 # Network Settings
 host: 'localhost'
 router_port: '6432'
-admin_console_port: '7433'
+admin_console_port: '6433'
 grpc_api_port: '7001'
 
 # Debug Settings
 show_notice_messages: true
-init_sql: './tmp/dev-init.sql'
+init_sql: './tmp-mat/dev-init.sql'
 use_coordinator_init: true
 use_init_sql: false
 
 # Frontend Rules
 # Frontend rule is a specification of how clients connect to the router.
 frontend_rules:
-  - db: postgres
-    usr: usr
+  - db: db1
+    usr: user1
     pool_mode: TRANSACTION
     pool_prepared_statement: true
     auth_rule:
@@ -25,38 +25,38 @@ frontend_rules:
 
 # Backend Rules
 backend_rules:
-  - db: postgres
-    usr: usr
+  - db: db1
+    usr: user1
     pool_discard: false
     pool_rollback: true
     auth_rules:
       sh1:
-        usr: usr
+        usr: user1
         password: pswd
       sh2:
-        usr: usr
+        usr: user1
         password: pswd
 
 # Shards
 shards:
   sh1:
-    db: postgres
-    usr: usr
+    db: db1
+    usr: user1
     pwd: pswd
     type: DATA
     tls:
       sslmode: disable
     hosts:
-      - 'localhost:5431'
+      - 'localhost:7432'
   sh2:
-    db: postgres
-    usr: usr
+    db: db1
+    usr: user1
     pwd: pswd
     type: DATA
     tls:
       sslmode: disable
     hosts:
-      - 'localhost:5430'
+      - 'localhost:7433'
 
 
 with_jaeger: false

@@ -29,7 +29,7 @@ services:
       POSTGRES_PASSWORD: "pswd"
       POSTGRES_DB: "postgres"
     ports:
-      - "5431:5432"
+      - "5431:6432"
     volumes:
       - postgres1-data:/var/lib/postgresql/data
 
@@ -41,7 +41,7 @@ services:
       POSTGRES_PASSWORD: "pswd"
       POSTGRES_DB: "postgres"
     ports:
-      - "5430:5432"
+      - "5430:6432"
     volumes:
       - postgres2-data:/var/lib/postgresql/data
 

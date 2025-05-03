@@ -6,13 +6,13 @@ log_level: DEBUG
 shard_data: './tmp/shard_data.yaml'
 
 show_notice_messages: true
-init_sql: './tmp/dev-init.sql'
+init_sql: './tmp-mat/dev-init.sql'
 use_coordinator_init: true
 use_init_sql: false
 
 frontend_rules:
-  - usr: usr
-    db: postgres
+  - usr: user1
+    db: db1
     pool_default: true
     pool_mode: TRANSACTION
     pool_prepared_statement: false

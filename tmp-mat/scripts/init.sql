@@ -6,6 +6,6 @@ CREATE TABLE orders (
 
 CREATE TABLE items (
     id SERIAL NOT NULL PRIMARY KEY,
-    order_id SERIAL NOT NULL PRIMARY KEY,
+    order_id SERIAL NOT NULL,
     name VARCHAR
 );

@@ -2,8 +2,6 @@ package coord
 
 import (
 	"context"
-	"log"
-
 	"github.com/pg-sharding/spqr/pkg/config"
 	"github.com/pg-sharding/spqr/pkg/meta"
 	"github.com/pg-sharding/spqr/pkg/models/distributions"
@@ -1001,8 +999,6 @@ func (a *Adapter) Create2PhaseCommitWithLease(ctx context.Context, txId string) 
 	if err != nil {
 		return -1, err
 	}
-
-	log.Default().Printf("2PC created with id %s", resp.Lease)
 
 	return resp.Lease, nil
 }

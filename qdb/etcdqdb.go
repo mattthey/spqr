@@ -41,6 +41,9 @@ func NewEtcdQDB(addr string) (*EtcdQDB, error) {
 		return nil, err
 	}
 
+	watcher := NewLeaseWatcher(cli)
+	watcher.Start(context.Background())
+
 	spqrlog.Zero.Debug().
 		Str("address", addr).
 		Uint("client", spqrlog.GetPointer(cli)).
@@ -65,6 +68,7 @@ const (
 	sequenceNamespace              = "/sequences/"
 	columnSequenceMappingNamespace = "/column_sequence_mappings/"
 	twoPhaseCommits                = "/2p_commits/"
+	twoPhaseCommitsLease           = "/2p_commits/lease/"
 
 	CoordKeepAliveTtl = 3
 	keyspace          = "key_space"
@@ -74,6 +78,10 @@ const (
 
 func twoPhaseCommitPath(key string) string {
 	return path.Join(twoPhaseCommits, key)
+}
+
+func twoPhaseCommitLeasePath(key string) string {
+	return path.Join(twoPhaseCommitsLease, key)
 }
 
 func keyLockPath(key string) string {
@@ -126,19 +134,23 @@ func columnSequenceMappingNodePath(relName, colName string) string {
 // Create2PhaseCommitWithLease creates a two-phase commit in etcd with a lease of 1 minute.
 // The transaction is stored with an initial status of "Init". It returns the lease ID.
 func (q *EtcdQDB) Create2PhaseCommitWithLease(ctx context.Context, txId string) (int64, error) {
-	// Log the start of creating a two-phase commit with lease
 	spqrlog.Zero.Debug().
 		Interface("two-phase-commit", "Create2PhaseCommitWithLease").
 		Str("txId", txId).
 		Msg("etcdqdb: two-phase-commit")
 
 	// Grant a lease for 60 seconds
-	leaseResp, err := q.cli.Grant(ctx, 60)
+	// todo extract to config
+	leaseResp, err := q.cli.Grant(ctx, 10)
 	if err != nil {
 		return -1, err
 	}
 
-	if _, err = q.cli.Put(ctx, twoPhaseCommitPath(txId), "Init", clientv3.WithLease(leaseResp.ID)); err != nil {
+	if _, err = q.cli.Put(ctx, twoPhaseCommitLeasePath(txId), txId, clientv3.WithLease(leaseResp.ID)); err != nil {
+		return -1, err
+	}
+
+	if _, err = q.cli.Put(ctx, twoPhaseCommitPath(txId), "Init"); err != nil {
 		return -1, err
 	}
 

@@ -1005,7 +1005,7 @@ func (a *Adapter) Create2PhaseCommitWithLease(ctx context.Context, txId string) 
 
 func (a *Adapter) Update2PhaseCommit(ctx context.Context, txId string, status string) error {
 	c := proto.NewTwoPCServiceClient(a.conn)
-	_, err := c.Update2PhaseCommitStatus(context.Background(), &proto.TwoPCRequest{
+	_, err := c.Update2PhaseCommitStatus(ctx, &proto.TwoPCRequest{
 		Txid:   txId,
 		Status: status,
 	})

@@ -26,8 +26,8 @@ func (w *LeaseWatcher) Start(ctx context.Context) {
 		watcher := clientv3.NewWatcher(w.client)
 		defer watcher.Close()
 
-		// Watch all lease events
-		watchChan := watcher.Watch(ctx, "\x00", clientv3.WithPrefix())
+		// use WithPrevKV to get the value, after delete value is null
+		watchChan := watcher.Watch(ctx, twoPhaseCommitsLease, clientv3.WithPrefix(), clientv3.WithPrevKV())
 
 		for {
 			select {
@@ -45,8 +45,10 @@ func (w *LeaseWatcher) Start(ctx context.Context) {
 
 				for _, event := range watchResp.Events {
 					if event.Type == clientv3.EventTypeDelete {
+						// every event need
 						spqrlog.Zero.Debug().
 							Str("key", string(event.Kv.Key)).
+							Str("value", string(event.PrevKv.Value)).
 							Msg("Lease expired")
 					}
 				}

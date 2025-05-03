@@ -761,14 +761,17 @@ func (mr *MockCoordinatorMockRecorder) WriteMoveTaskGroup(ctx, taskGroup any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WriteMoveTaskGroup", reflect.TypeOf((*MockCoordinator)(nil).WriteMoveTaskGroup), ctx, taskGroup)
 }
 
-func (a *MockCoordinatorMockRecorder) Create2PhaseCommit(txid string, msg string) error  {
-	return nil
+// todo mattthey implement this
+func (a *MockCoordinatorMockRecorder) Create2PhaseCommitWithLease(ctx context.Context, txId string) (string, error)  {
+	return "", nil
 }
 
+// todo mattthey implement this
 func (a *MockCoordinatorMockRecorder) GetAll2PhaseCommits() (map[string][]string, error)  {
 	return nil, nil
 }
 
+// todo mattthey implement this
 func (a *MockCoordinatorMockRecorder) Delete2PhaseCommit(txid string, msg string) error  {
 	return nil
 }

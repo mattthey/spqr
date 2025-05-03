@@ -2091,8 +2091,8 @@ func (qc *QDBCoordinator) IsReadOnly() bool {
 	return !qc.acquiredLock
 }
 
-func (a *QDBCoordinator) Create2PhaseCommit(txid string, msg string) error {
-	return nil
+func (a *QDBCoordinator) Create2PhaseCommitWithLease(ctx context.Context, txId string) (string, error) {
+	return "", nil
 }
 
 func (a *QDBCoordinator) GetAll2PhaseCommits() (map[string][]string, error) {

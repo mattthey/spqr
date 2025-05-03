@@ -17,5 +17,5 @@ message TwoPCRequest {
 }
 
 message CreateTwoPCReply {
-  string lease = 1;
+  int64 lease = 1;
 }

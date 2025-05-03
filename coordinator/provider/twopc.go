@@ -20,16 +20,24 @@ type TwoPCService struct {
 	impl coordinator.Coordinator
 }
 
-func (t TwoPCService) Create2PhaseCommit(context.Context, *protos.TwoPCRequest) (*protos.CreateTwoPCReply, error) {
-	// todo доделать, чтобы координатор сохранях инфу в etcd
+func (t TwoPCService) Create2PhaseCommit(context context.Context, request *protos.TwoPCRequest) (*protos.CreateTwoPCReply, error) {
+	leaseId, err := t.impl.QDB().Create2PhaseCommitWithLease(context, request.Txid)
+	if err != nil {
+		return nil, err
+	}
+
 	return &protos.CreateTwoPCReply{
-		Lease: "",
+		Lease: leaseId,
 	}, nil
 }
 
-func (t TwoPCService) Update2PhaseCommitStatus(context.Context, *protos.TwoPCRequest) (*emptypb.Empty, error) {
-	// todo доделать, чтобы координатор сохранях инфу в etcd
-	return nil, nil
+func (t TwoPCService) Update2PhaseCommitStatus(context context.Context, request *protos.TwoPCRequest) (*emptypb.Empty, error) {
+	err := t.impl.QDB().Update2PhaseCommit(context, request.Txid, request.Status)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 var _ protos.TwoPCServiceServer = &TwoPCService{}

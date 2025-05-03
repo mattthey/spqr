@@ -992,25 +992,27 @@ func (a *Adapter) NextVal(ctx context.Context, seqName string) (int64, error) {
 	return resp.Value, err
 }
 
-func (a *Adapter) Create2PhaseCommit(txid string, msg string) error {
+func (a *Adapter) Create2PhaseCommitWithLease(ctx context.Context, txId string) (int64, error) {
 	c := proto.NewTwoPCServiceClient(a.conn)
 	resp, err := c.Create2PhaseCommit(context.Background(), &proto.TwoPCRequest{
-		Txid:   txid,
+		Txid:   txId,
 		Status: "I",
 	})
 	if err != nil {
-		return err
+		return -1, err
 	}
 
 	log.Default().Printf("2PC created with id %s", resp.Lease)
 
-	return nil
+	return resp.Lease, nil
 }
 
-func (a *Adapter) GetAll2PhaseCommits() (map[string][]string, error) {
-	return nil, nil
-}
+func (a *Adapter) Update2PhaseCommit(ctx context.Context, txId string, status string) error {
+	c := proto.NewTwoPCServiceClient(a.conn)
+	_, err := c.Update2PhaseCommitStatus(context.Background(), &proto.TwoPCRequest{
+		Txid:   txId,
+		Status: status,
+	})
 
-func (a *Adapter) Delete2PhaseCommit(txid string, msg string) error {
-	return nil
+	return err
 }

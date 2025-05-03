@@ -47,8 +47,6 @@ type DistributedXactKepper interface {
 * implementation to keep the distributed state in sync.
  */
 type QDB interface {
-	Create2phaseCommit(ctx context.Context, txId string, shards []string) error
-	GetAll2phaseCommits(ctx context.Context) (*map[string][]string, error)
 	CreateKeyRange(ctx context.Context, keyRange *KeyRange) error
 	GetKeyRange(ctx context.Context, id string) (*KeyRange, error)
 	UpdateKeyRange(ctx context.Context, keyRange *KeyRange) error
@@ -100,6 +98,12 @@ type QDB interface {
 	GetRelationSequence(ctx context.Context, relName string) (map[string]string, error)
 	NextVal(ctx context.Context, seqName string) (int64, error)
 	DropSequence(ctx context.Context, seqName string) error
+
+	// 2phase commit
+	Create2PhaseCommitWithLease(ctx context.Context, txId string) (int64, error)
+	Update2PhaseCommit(ctx context.Context, txId string, status string) error
+	Delete2PhaseCommit(ctx context.Context, txId string) error
+	Get2PhaseCommit(ctx context.Context, txId string) (string, error)
 }
 
 // XQDB means extended QDB

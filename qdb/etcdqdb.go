@@ -64,7 +64,7 @@ const (
 	transactionNamespace           = "/transfer_txs/"
 	sequenceNamespace              = "/sequences/"
 	columnSequenceMappingNamespace = "/column_sequence_mappings/"
-	twoPhaseCommits          = "/2p_commits/"
+	twoPhaseCommits                = "/2p_commits/"
 
 	CoordKeepAliveTtl = 3
 	keyspace          = "key_space"
@@ -123,21 +123,83 @@ func columnSequenceMappingNodePath(relName, colName string) string {
 	return path.Join(relationSequenceMappingNodePath(relName), colName)
 }
 
-func (q *EtcdQDB) Create2phaseCommit(ctx context.Context, txId string, shards []string) error {
+// Create2PhaseCommitWithLease creates a two-phase commit in etcd with a lease of 1 minute.
+// The transaction is stored with an initial status of "Init". It returns the lease ID.
+func (q *EtcdQDB) Create2PhaseCommitWithLease(ctx context.Context, txId string) (int64, error) {
+	// Log the start of creating a two-phase commit with lease
 	spqrlog.Zero.Debug().
-		Interface("two-phase-commit", txId).
-		Msg("etcdqdb: two-phase-commit " + txId)
+		Interface("two-phase-commit", "Create2PhaseCommitWithLease").
+		Str("txId", txId).
+		Msg("etcdqdb: two-phase-commit")
 
-	resp, err := q.cli.Put(ctx, twoPhaseCommitPath(txId), strings.Join(shards, "|"))
+	// Grant a lease for 60 seconds
+	leaseResp, err := q.cli.Grant(ctx, 60)
 	if err != nil {
-		return err
+		return -1, err
+	}
+
+	if _, err = q.cli.Put(ctx, twoPhaseCommitPath(txId), "Init", clientv3.WithLease(leaseResp.ID)); err != nil {
+		return -1, err
 	}
 
 	spqrlog.Zero.Debug().
-		Interface("two-phase-commit", resp).
-		Msg("etcdqdb: put key range to qdb")
+		Interface("two-phase-commit", "Create2PhaseCommitWithLease").
+		Str("txId", txId).
+		Str("lease", fmt.Sprintf("%d", leaseResp.ID)).
+		Msg("etcdqdb: put 2 phase commit to qdb with lease")
+
+	return int64(leaseResp.ID), err
+}
+
+func (q *EtcdQDB) Update2PhaseCommit(ctx context.Context, txId string, status string) error {
+	spqrlog.Zero.Debug().
+		Interface("two-phase-commit", "Update2PhaseCommit ").
+		Str("txId", txId).
+		Str("status", status).
+		Msg("etcdqdb: two-phase-commit")
+
+	_, err := q.cli.Put(ctx, twoPhaseCommitPath(txId), status)
+
+	spqrlog.Zero.Debug().
+		Interface("two-phase-commit", "Update2PhaseCommit").
+		Str("txId", txId).
+		Str("status", status).
+		Msg("etcdqdb: update 2 phase commit in qdb")
 
 	return err
+}
+
+func (q *EtcdQDB) Delete2PhaseCommit(ctx context.Context, txId string) error {
+	spqrlog.Zero.Debug().
+		Interface("two-phase-commit", "Delete2PhaseCommit").
+		Str("txId", txId).
+		Msg("etcdqdb: two-phase-commit")
+
+	_, err := q.cli.Delete(ctx, twoPhaseCommitPath(txId))
+
+	spqrlog.Zero.Debug().
+		Interface("two-phase-commit", "Delete2PhaseCommit").
+		Str("txId", txId).
+		Msg("etcdqdb: delete 2 phase commit from qdb")
+	return err
+}
+
+func (q *EtcdQDB) Get2PhaseCommit(ctx context.Context, txId string) (string, error) {
+	spqrlog.Zero.Debug().
+		Str("txId", txId).
+		Msg("etcdqdb: get 2 phase commit")
+	resp, err := q.cli.Get(ctx, twoPhaseCommitPath(txId))
+	if err != nil {
+		return "", err
+	}
+	result := string(resp.Kvs[0].Value)
+
+	spqrlog.Zero.Debug().
+		Str("txId", txId).
+		Interface("response", resp).
+		Msg("etcdqdb: get 2 phase commit from qdb")
+
+	return result, nil
 }
 
 func (q *EtcdQDB) GetAll2phaseCommits(ctx context.Context) (*map[string][]string, error) {

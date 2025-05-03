@@ -128,13 +128,20 @@ func (q *MemQDB) DumpState() error {
 	return nil
 }
 
-func (q *MemQDB) Create2phaseCommit(ctx context.Context, txId string, shards []string) error {
+func (q *MemQDB) Create2PhaseCommitWithLease(ctx context.Context, txId string) (int64, error) {
+	return -1, nil
+}
+
+func (q *MemQDB) Update2PhaseCommit(ctx context.Context, txId string, status string) error {
 	return nil
 }
 
-func (q *MemQDB) GetAll2phaseCommits(ctx context.Context) (*map[string][]string, error) {
-	// TODO implement
-	return nil, nil
+func (q *MemQDB) Delete2PhaseCommit(ctx context.Context, txId string) error {
+	return nil
+}
+
+func (q *MemQDB) Get2PhaseCommit(ctx context.Context, txId string) (string, error) {
+	return "", nil
 }
 
 // ==============================================================================

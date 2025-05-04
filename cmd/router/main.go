@@ -277,6 +277,9 @@ var runCmd = &cobra.Command{
 						return err
 					}
 
+					// todo add feature flag
+					coordinator.WatchEvents(ctx)
+
 					app := coordApp.NewApp(coordinator)
 					return app.Run(false)
 				}(); err != nil {

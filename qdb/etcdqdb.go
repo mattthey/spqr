@@ -41,9 +41,6 @@ func NewEtcdQDB(addr string) (*EtcdQDB, error) {
 		return nil, err
 	}
 
-	watcher := NewLeaseWatcher(cli)
-	watcher.Start(context.Background())
-
 	spqrlog.Zero.Debug().
 		Str("address", addr).
 		Uint("client", spqrlog.GetPointer(cli)).
@@ -68,7 +65,7 @@ const (
 	sequenceNamespace              = "/sequences/"
 	columnSequenceMappingNamespace = "/column_sequence_mappings/"
 	twoPhaseCommits                = "/2p_commits/"
-	twoPhaseCommitsLease           = "/2p_commits/lease/"
+	TwoPhaseCommitsLease           = "/2p_commits/lease/"
 
 	CoordKeepAliveTtl = 3
 	keyspace          = "key_space"
@@ -81,7 +78,7 @@ func twoPhaseCommitPath(key string) string {
 }
 
 func twoPhaseCommitLeasePath(key string) string {
-	return path.Join(twoPhaseCommitsLease, key)
+	return path.Join(TwoPhaseCommitsLease, key)
 }
 
 func keyLockPath(key string) string {
@@ -1689,4 +1686,63 @@ func (q *EtcdQDB) NextVal(ctx context.Context, seqName string) (int64, error) {
 	_, err = q.cli.Put(ctx, id, fmt.Sprintf("%d", nextval))
 
 	return nextval, err
+}
+
+func (q *EtcdQDB) GetWatcher(ctx context.Context, keyPrefix string) (Watcher, error) {
+	return NewEtcdWatcher(q.cli), nil
+}
+
+//func (q *EtcdQDB) WatchEvents(ctx context.Context) error {
+//	go func() {
+//		watcher := clientv3.NewWatcher(q.cli)
+//		defer watcher.Close()
+//
+//		watchChan := watcher.Watch(ctx, TwoPhaseCommitsLease, clientv3.WithPrefix(), clientv3.WithPrevKV())
+//		for watchResp := range watchChan {
+//			for _, event := range watchResp.Events {
+//				if event.Type == clientv3.EventTypeDelete {
+//					txid := string(event.Kv.Key)[len(TwoPhaseCommitsLease):]
+//					status, err := q.Get2PhaseCommit(ctx, txid)
+//					if err != nil {
+//						spqrlog.Zero.Error().Err(err).Msg("Failed to get 2-phase commit")
+//						continue
+//					}
+//
+//					if status == "commited" {
+//						if err := q.Delete2PhaseCommit(ctx, txid); err != nil {
+//							spqrlog.Zero.Error().Err(err).Msg("Failed to delete 2-phase commit")
+//						}
+//						return
+//					}
+//
+//					router, err := q.findFirstOpenRouter(ctx)
+//					if err != nil {
+//						spqrlog.Zero.Error().Err(err).Msg("Failed to find open router")
+//						continue
+//					}
+//
+//					if err := router.Finish2PhaseCommit(ctx, txid); err != nil {
+//						spqrlog.Zero.Error().Err(err).Msg("Failed to finish 2-phase commit")
+//					}
+//				}
+//			}
+//		}
+//	}()
+//
+//	return nil
+//}
+
+func (q *EtcdQDB) FindFirstOpenRouter(ctx context.Context) (*Router, error) {
+	routers, err := q.ListRouters(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, router := range routers {
+		if router.State == OPENED {
+			return router, nil
+		}
+	}
+
+	return nil, spqrerror.New(spqrerror.SPQR_ROUTER_ERROR, "no open router found")
 }

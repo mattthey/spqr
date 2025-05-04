@@ -2102,3 +2102,73 @@ func (a *QDBCoordinator) GetAll2PhaseCommits() (map[string][]string, error) {
 func (a *QDBCoordinator) Delete2PhaseCommit(txid string, msg string) error {
 	return nil
 }
+
+func (qc *QDBCoordinator) WatchEvents(ctx context.Context) {
+	go func() {
+		watcher, err := qc.db.GetWatcher(ctx, qdb.TwoPhaseCommitsLease)
+		if err != nil {
+			spqrlog.Zero.Error().Err(err).Msg("failed to get watcher")
+			return
+		}
+		defer watcher.Close()
+		watchChan := watcher.Watch(ctx, qdb.TwoPhaseCommitsLease)
+		for watchResp := range watchChan {
+			for _, event := range watchResp.Events {
+				if event.Type != qdb.EventTypeDelete {
+					continue
+				}
+				txid := event.Key[len(qdb.TwoPhaseCommitsLease):]
+				status, err := qc.db.Get2PhaseCommit(ctx, txid)
+				if err != nil {
+					spqrlog.Zero.
+						Error().
+						Err(err).
+						Msg("failed to get 2-phase commit")
+					continue
+				}
+
+				// todo statuses to constants
+				if status == "committed" {
+					if err := qc.db.Delete2PhaseCommit(ctx, txid); err != nil {
+						spqrlog.Zero.Error().Err(err).Msg("Failed to delete 2-phase commit")
+					}
+					continue
+				}
+
+				r, err := qc.db.FindFirstOpenRouter(ctx)
+				if err != nil {
+					spqrlog.Zero.Error().Err(err).Msg("failed to find first open router")
+					continue
+				}
+				// send event for router should be finish tx
+				qRouter := &topology.Router{
+					ID:      r.ID,
+					Address: r.Address,
+				}
+
+				cc, err := DialRouter(qRouter)
+				if err != nil {
+					spqrlog.Zero.Error().Err(err).Msg("failed to dial router")
+					continue
+				}
+				defer cc.Close()
+
+				twoPCServiceClient := routerproto.NewTwoPCServiceClient(cc)
+				// todo add shards
+				request := &routerproto.TwoPCCommit{
+					Txid:         txid,
+					ActualStatus: status,
+				}
+				_, err = twoPCServiceClient.Finish2PhaseCommit(ctx, request)
+				if err != nil {
+					spqrlog.Zero.
+						Error().
+						Err(err).
+						Msg("failed to finish 2-phase commit")
+					continue
+				}
+			}
+		}
+
+	}()
+}

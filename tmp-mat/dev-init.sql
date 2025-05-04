@@ -1,7 +1,5 @@
 create distribution ds1 column types integer;
 
-create distribution ds1 column types integer;
-
 ALTER DISTRIBUTION ds1 ATTACH RELATION orders DISTRIBUTION KEY id;
 ALTER DISTRIBUTION ds1 ATTACH RELATION items DISTRIBUTION KEY order_id;
 

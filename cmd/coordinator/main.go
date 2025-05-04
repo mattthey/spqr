@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"runtime"
@@ -78,6 +79,8 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		coordinator.WatchEvents(context.Background())
 
 		app := app.NewApp(coordinator)
 		return app.Run(true)

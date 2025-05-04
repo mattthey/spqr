@@ -116,6 +116,8 @@ type XQDB interface {
 	// data move state
 	ShardingSchemaKeeper
 	DistributedXactKepper
+	// watcher
+	WatcherProvider
 
 	TryCoordinatorLock(ctx context.Context) error
 }
@@ -144,4 +146,10 @@ type DataTransferTransaction struct {
 	ToShardId   string   `json:"to_shard"`
 	FromShardId string   `json:"from_shard"`
 	Status      TxStatus `json:"status"`
+}
+
+type WatcherProvider interface {
+	// GetWatcher returns watcher for capturing changes events
+	GetWatcher(ctx context.Context, keyPrefix string) (Watcher, error)
+	FindFirstOpenRouter(ctx context.Context) (*Router, error)
 }

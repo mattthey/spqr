@@ -3,6 +3,7 @@ package relay
 import (
 	"context"
 	"fmt"
+	"github.com/pg-sharding/spqr/router/twopc/twopc_constants"
 	"io"
 	"strings"
 	"time"
@@ -17,7 +18,6 @@ import (
 	"github.com/pg-sharding/spqr/pkg/txstatus"
 	"github.com/pg-sharding/spqr/router/parser"
 	"github.com/pg-sharding/spqr/router/statistics"
-	"github.com/pg-sharding/spqr/router/twopc"
 )
 
 func AdvancedPoolModeNeeded(rst RelayStateMgr) bool {
@@ -211,11 +211,11 @@ func ProcQueryAdvanced(rst RelayStateMgr, query string, state parser.ParseState,
 
 			if val, ok := mp[session.SPQR_COMMIT_STRATEGY]; ok {
 				switch val {
-				case twopc.COMMIT_STRATEGY_2PC:
+				case twopc_constants.COMMIT_STRATEGY_2PC:
 					fallthrough
-				case twopc.COMMIT_STRATEGY_1PC:
+				case twopc_constants.COMMIT_STRATEGY_1PC:
 					fallthrough
-				case twopc.COMMIT_STRATEGY_BEST_EFFORT:
+				case twopc_constants.COMMIT_STRATEGY_BEST_EFFORT:
 					rst.Client().SetCommitStrategy(false, val)
 				default:
 					/*should error-out*/

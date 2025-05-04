@@ -2,7 +2,9 @@ package twopc
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/pg-sharding/spqr/pkg/models/topology"
 
 	"github.com/jackc/pgx/v5/pgproto3"
 	"github.com/pg-sharding/spqr/pkg/coord"
@@ -13,13 +15,6 @@ import (
 	"github.com/pg-sharding/spqr/router/server"
 	"github.com/samborkent/uuidv7"
 	"google.golang.org/grpc"
-)
-
-const (
-	COMMIT_STRATEGY_BEST_EFFORT = "best-effort"
-	/* same af above */
-	COMMIT_STRATEGY_1PC = "1pc"
-	COMMIT_STRATEGY_2PC = "2pc"
 )
 
 func ExecuteTwoPhaseCommit(clid uint, s server.Server, qdb qdb.QDB) error {
@@ -89,6 +84,10 @@ func ExecuteTwoPhaseCommit(clid uint, s server.Server, qdb qdb.QDB) error {
 	spqrlog.Zero.Info().Uint("client", clid).Str("txid", txid).Msg("second phase succeeded")
 
 	return nil
+}
+
+func FinishTwoPhaseCommit(txid string, status string, shards []*topology.DataShard, qdb qdb.QDB) error {
+	return errors.New("not implemented yet")
 }
 
 // todo mattthey extract adapter to main method

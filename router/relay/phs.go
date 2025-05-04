@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/pg-sharding/spqr/qdb"
+	"github.com/pg-sharding/spqr/router/twopc/twopc_constants"
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgproto3"
@@ -120,7 +121,7 @@ func (s *QueryStateExecutorImpl) ExecCommitTx(query string, qdb qdb.QDB) error {
 
 	serv := s.cl.Server()
 
-	if s.cl.CommitStrategy() == twopc.COMMIT_STRATEGY_2PC && len(serv.Datashards()) > 1 {
+	if s.cl.CommitStrategy() == twopc_constants.COMMIT_STRATEGY_2PC && len(serv.Datashards()) > 1 {
 		if err := twopc.ExecuteTwoPhaseCommit(s.cl.ID(), serv, qdb); err != nil {
 			return err
 		}

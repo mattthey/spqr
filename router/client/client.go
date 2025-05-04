@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/binary"
 	"fmt"
+	"github.com/pg-sharding/spqr/router/twopc/twopc_constants"
 	"math/rand"
 	"sync"
 	"sync/atomic"
@@ -316,9 +317,7 @@ func NewPsqlClient(pgconn conn.RawConn, pt port.RouterPortType, defaultRouteBeha
 		serverP: atomic.Pointer[server.Server]{},
 	}
 
-	// fixme mattthey cycle import
-	//cl.SetCommitStrategy(false, twopc.COMMIT_STRATEGY_BEST_EFFORT)
-	cl.SetCommitStrategy(false, "best-effort")
+	cl.SetCommitStrategy(false, twopc_constants.COMMIT_STRATEGY_BEST_EFFORT)
 
 	cl.serverP.Store(nil)
 

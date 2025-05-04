@@ -3,6 +3,8 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"github.com/pg-sharding/spqr/pkg/spqrlog"
+	"github.com/pg-sharding/spqr/router/twopc"
 
 	"github.com/pg-sharding/spqr/pkg/client"
 	"github.com/pg-sharding/spqr/pkg/config"
@@ -494,6 +496,19 @@ func (l *LocalQrouterServer) RemoveBalancerTask(ctx context.Context, _ *emptypb.
 func (l *LocalQrouterServer) DropSequence(ctx context.Context, request *protos.DropSequenceRequest) (*emptypb.Empty, error) {
 	err := l.mgr.DropSequence(ctx, request.Name)
 	return nil, err
+}
+
+func (l *LocalQrouterServer) Finish2PhaseCommit(ctx context.Context, request *protos.TwoPCCommit) (*emptypb.Empty, error) {
+	//todo implement it
+	shards, err := l.mgr.ListShards(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, sh := range shards {
+		spqrlog.Zero.Debug().Msgf("shard: %v", sh)
+	}
+	err = twopc.FinishTwoPhaseCommit(request.Txid, request.ActualStatus, shards, l.mgr.QDB())
+	return &emptypb.Empty{}, err
 }
 
 func Register(server reflection.GRPCServer, qrouter qrouter.QueryRouter, mgr meta.EntityMgr, rr rulerouter.RuleRouter) {

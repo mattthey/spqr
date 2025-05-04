@@ -2121,12 +2121,15 @@ func (qc *QDBCoordinator) processWatchEvent(ctx context.Context, event *qdb.Watc
 		return
 	}
 
-	if status == "committed" { // Используем константу
+	// todo mattthey use constants
+	if status == "committed---" {
 		if err := qc.db.Delete2PhaseCommit(ctx, txid); err != nil {
 			spqrlog.Zero.Error().Err(err).Msg("failed to delete 2-phase commit")
 		}
 		return
 	}
+
+	//todo mattthey ??? добавить проверку, что роутер действительно мертв
 
 	r, err := qc.db.FindFirstOpenRouter(ctx)
 	if err != nil {
@@ -2139,7 +2142,7 @@ func (qc *QDBCoordinator) processWatchEvent(ctx context.Context, event *qdb.Watc
 		Address: r.Address,
 	}
 
-	func() { // Закрываем соединение сразу после обработки
+	func() { // close connection after processing
 		cc, err := DialRouter(qRouter)
 		if err != nil {
 			spqrlog.Zero.Error().Err(err).Msg("failed to dial router")

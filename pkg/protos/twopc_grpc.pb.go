@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	TwoPCService_Create2PhaseCommit_FullMethodName       = "/spqr.TwoPCService/Create2PhaseCommit"
 	TwoPCService_Update2PhaseCommitStatus_FullMethodName = "/spqr.TwoPCService/Update2PhaseCommitStatus"
+	TwoPCService_Finish2PhaseCommit_FullMethodName       = "/spqr.TwoPCService/Finish2PhaseCommit"
 )
 
 // TwoPCServiceClient is the client API for TwoPCService service.
@@ -30,6 +31,7 @@ const (
 type TwoPCServiceClient interface {
 	Create2PhaseCommit(ctx context.Context, in *TwoPCRequest, opts ...grpc.CallOption) (*CreateTwoPCReply, error)
 	Update2PhaseCommitStatus(ctx context.Context, in *TwoPCRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Finish2PhaseCommit(ctx context.Context, in *TwoPCCommit, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type twoPCServiceClient struct {
@@ -58,12 +60,22 @@ func (c *twoPCServiceClient) Update2PhaseCommitStatus(ctx context.Context, in *T
 	return out, nil
 }
 
+func (c *twoPCServiceClient) Finish2PhaseCommit(ctx context.Context, in *TwoPCCommit, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, TwoPCService_Finish2PhaseCommit_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TwoPCServiceServer is the server API for TwoPCService service.
 // All implementations must embed UnimplementedTwoPCServiceServer
 // for forward compatibility
 type TwoPCServiceServer interface {
 	Create2PhaseCommit(context.Context, *TwoPCRequest) (*CreateTwoPCReply, error)
 	Update2PhaseCommitStatus(context.Context, *TwoPCRequest) (*emptypb.Empty, error)
+	Finish2PhaseCommit(context.Context, *TwoPCCommit) (*emptypb.Empty, error)
 	mustEmbedUnimplementedTwoPCServiceServer()
 }
 
@@ -76,6 +88,9 @@ func (UnimplementedTwoPCServiceServer) Create2PhaseCommit(context.Context, *TwoP
 }
 func (UnimplementedTwoPCServiceServer) Update2PhaseCommitStatus(context.Context, *TwoPCRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update2PhaseCommitStatus not implemented")
+}
+func (UnimplementedTwoPCServiceServer) Finish2PhaseCommit(context.Context, *TwoPCCommit) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Finish2PhaseCommit not implemented")
 }
 func (UnimplementedTwoPCServiceServer) mustEmbedUnimplementedTwoPCServiceServer() {}
 
@@ -126,6 +141,24 @@ func _TwoPCService_Update2PhaseCommitStatus_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TwoPCService_Finish2PhaseCommit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TwoPCCommit)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TwoPCServiceServer).Finish2PhaseCommit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TwoPCService_Finish2PhaseCommit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TwoPCServiceServer).Finish2PhaseCommit(ctx, req.(*TwoPCCommit))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TwoPCService_ServiceDesc is the grpc.ServiceDesc for TwoPCService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -140,6 +173,10 @@ var TwoPCService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Update2PhaseCommitStatus",
 			Handler:    _TwoPCService_Update2PhaseCommitStatus_Handler,
+		},
+		{
+			MethodName: "Finish2PhaseCommit",
+			Handler:    _TwoPCService_Finish2PhaseCommit_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

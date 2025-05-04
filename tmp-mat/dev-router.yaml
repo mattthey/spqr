@@ -10,7 +10,7 @@ grpc_api_port: '7001'
 # Debug Settings
 show_notice_messages: true
 init_sql: './tmp-mat/dev-init.sql'
-use_coordinator_init: true
+use_coordinator_init: false
 use_init_sql: false
 
 # Frontend Rules
@@ -57,7 +57,15 @@ shards:
       sslmode: disable
     hosts:
       - 'localhost:7433'
-
+  sh3:
+    db: db1
+    usr: user1
+    pwd: pswd
+    type: DATA
+    tls:
+      sslmode: disable
+    hosts:
+      - 'localhost:7434'
 
 with_jaeger: false
 world_shard_fallback: true

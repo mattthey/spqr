@@ -1,19 +1,28 @@
 shards:
   sh1:
-    db: postgres
+    db: db1
     usr: usr
     pwd: pswd
     type: DATA
     tls:
       sslmode: disable
     hosts:
-      - 'localhost:5431'
+      - 'localhost:7432'
   sh2:
-    db: postgres
+    db: db1
     usr: usr
     pwd: pswd
     type: DATA
     tls:
       sslmode: disable
     hosts:
-      - 'localhost:5430'
+      - 'localhost:7433'
+  sh3:
+    db: db1
+    usr: usr
+    pwd: pswd
+    type: DATA
+    tls:
+      sslmode: disable
+    hosts:
+      - 'localhost:7434'

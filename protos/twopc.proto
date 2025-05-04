@@ -9,6 +9,7 @@ import "google/protobuf/empty.proto";
 service TwoPCService {
   rpc Create2PhaseCommit(TwoPCRequest) returns (CreateTwoPCReply) {};
   rpc Update2PhaseCommitStatus(TwoPCRequest) returns(google.protobuf.Empty) {};
+  rpc Finish2PhaseCommit(TwoPCCommit) returns(google.protobuf.Empty) {};
 }
 
 message TwoPCRequest {
@@ -18,4 +19,9 @@ message TwoPCRequest {
 
 message CreateTwoPCReply {
   int64 lease = 1;
+}
+
+message TwoPCCommit {
+  string txid = 1;
+  string actualStatus = 2;
 }

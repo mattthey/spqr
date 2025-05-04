@@ -2,6 +2,7 @@ package qdb
 
 import (
 	"context"
+	"github.com/pg-sharding/spqr/pkg/spqrlog"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -23,34 +24,47 @@ func (w *EtcdWatcher) Watch(ctx context.Context, key string) WatchChan {
 	ch := make(chan WatchResponse)
 
 	go func() {
-		//defer close(ch)
-		for watchResp := range etcdChan {
-			if watchResp.Err() != nil {
-				ch <- WatchResponse{Err: watchResp.Err()}
-				continue
+		defer close(ch) // Закрываем канал, чтобы избежать утечек
+
+		for {
+			select {
+			case <-ctx.Done(): // Завершаем горутину, если контекст завершён
+				return
+			case watchResp, ok := <-etcdChan:
+				if !ok {
+					spqrlog.Zero.
+						Error().
+						Msg("etcd watch channel closed")
+					return // Завершаем, если канал etcdChan закрыт
+				}
+
+				if watchResp.Err() != nil {
+					ch <- WatchResponse{Err: watchResp.Err()}
+					continue
+				}
+
+				events := make([]*WatchEvent, 0, len(watchResp.Events))
+				for _, e := range watchResp.Events {
+					event := &WatchEvent{
+						Key:   string(e.Kv.Key),
+						Value: string(e.Kv.Value),
+					}
+
+					if e.Type == clientv3.EventTypeDelete {
+						event.Type = EventTypeDelete
+					} else {
+						event.Type = EventTypePut
+					}
+
+					if e.PrevKv != nil {
+						event.PrevVal = string(e.PrevKv.Value)
+					}
+
+					events = append(events, event)
+				}
+
+				ch <- WatchResponse{Events: events}
 			}
-
-			events := make([]*WatchEvent, 0, len(watchResp.Events))
-			for _, e := range watchResp.Events {
-				event := &WatchEvent{
-					Key:   string(e.Kv.Key),
-					Value: string(e.Kv.Value),
-				}
-
-				if e.Type == clientv3.EventTypeDelete {
-					event.Type = EventTypeDelete
-				} else {
-					event.Type = EventTypePut
-				}
-
-				if e.PrevKv != nil {
-					event.PrevVal = string(e.PrevKv.Value)
-				}
-
-				events = append(events, event)
-			}
-
-			ch <- WatchResponse{Events: events}
 		}
 	}()
 

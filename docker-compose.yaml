@@ -72,7 +72,6 @@ services:
         ports:
             - "8432:6432"
             - "7013:7000"
-            - "7431:7432"
         hostname: spqr_router_1_1
         container_name: spqr_router_1_1
         environment:
@@ -86,7 +85,6 @@ services:
         ports:
             - "8433:6432"
             - "7023:7003"
-            - "7430:7432"
         hostname: spqr_router_1_2
         container_name: spqr_router_1_2
         environment:

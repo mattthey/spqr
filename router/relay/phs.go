@@ -145,18 +145,8 @@ func (s *QueryStateExecutorImpl) ExecCommit(rst RelayStateMgr, query string) err
 		return nil
 	}
 
-	spqrlog.Zero.Debug().Uint("client", s.cl.ID()).Str("commit strategy", s.cl.CommitStrategy()).Msg("execute commit")
-
-	if s.cl.CommitStrategy() == twopc.COMMIT_STRATEGY_2PC && len(s.Client().Server().Datashards()) > 1 {
-		qdb := rst.QueryRouter().Mgr().QDB()
-		if err := twopc.ExecuteTwoPhaseCommit(s.cl.ID(), s.Client().Server(), qdb); err != nil {
-			return err
-		}
-	} else {
-		if err := s.deployTxStatusInternal(s.Client().Server(),
-			&pgproto3.Query{String: query}, txstatus.TXIDLE); err != nil {
-			return err
-		}
+	if err := s.ExecCommitTx(query, rst.QueryRouter().Mgr().QDB()); err != nil {
+		return err
 	}
 
 	rst.Client().CommitActiveSet()

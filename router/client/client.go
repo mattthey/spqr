@@ -316,7 +316,7 @@ func NewPsqlClient(pgconn conn.RawConn, pt port.RouterPortType, defaultRouteBeha
 		serverP: atomic.Pointer[server.Server]{},
 	}
 
-	// fixme cycle import
+	// fixme mattthey cycle import
 	//cl.SetCommitStrategy(false, twopc.COMMIT_STRATEGY_BEST_EFFORT)
 	cl.SetCommitStrategy(false, "best-effort")
 

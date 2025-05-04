@@ -968,10 +968,10 @@ func (q *MemQDB) NextVal(_ context.Context, seqName string) (int64, error) {
 }
 
 // todo mattthey think about implementation it
-func (q *MemQDB) GetWatcher(ctx context.Context, keyPrefix string) (Watcher, error) {
+func (q *MemQDB) GetWatcher() (Watcher, error) {
 	return nil, spqrerror.New(spqrerror.SPQR_NOT_IMPLEMENTED, "memqdb does not support watchers")
 }
 
-func (q *MemQDB) FindFirstOpenRouter(ctx context.Context) (*Router, error) {
+func (q *MemQDB) FindFirstOpenRouter(context.Context) (*Router, error) {
 	return nil, spqrerror.New(spqrerror.SPQR_NOT_IMPLEMENTED, "memqdb does not support watchers")
 }

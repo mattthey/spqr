@@ -150,6 +150,6 @@ type DataTransferTransaction struct {
 
 type WatcherProvider interface {
 	// GetWatcher returns watcher for capturing changes events
-	GetWatcher(ctx context.Context, keyPrefix string) (Watcher, error)
+	GetWatcher() (Watcher, error)
 	FindFirstOpenRouter(ctx context.Context) (*Router, error)
 }

@@ -496,13 +496,6 @@ func (l *LocalQrouterServer) DropSequence(ctx context.Context, request *protos.D
 	return nil, err
 }
 
-// todo : unit tests
-func (l LocalQrouterServer) Create2PhaseCommit(context.Context, *protos.TwoPCRequest) (*protos.CreateTwoPCReply, error) {
-	return &protos.CreateTwoPCReply{
-		Lease: -1,
-	}, nil
-}
-
 func Register(server reflection.GRPCServer, qrouter qrouter.QueryRouter, mgr meta.EntityMgr, rr rulerouter.RuleRouter) {
 
 	lqr := &LocalQrouterServer{

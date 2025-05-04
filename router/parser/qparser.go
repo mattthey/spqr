@@ -230,7 +230,7 @@ func (qp *QParser) Parse(query string) (ParseState, string, error) {
 	case *lyx.TransactionStmt:
 		switch q.Kind {
 		case lyx.TRANS_STMT_BEGIN:
-			qp.state = ParseStateTXBegin{ // по типу мы можем определить состояние транзакции
+			qp.state = ParseStateTXBegin{
 				Options: q.Options,
 			}
 			return qp.state, comment, nil

@@ -143,6 +143,7 @@ func (q *EtcdQDB) Create2PhaseCommitWithLease(ctx context.Context, txId string) 
 		return -1, err
 	}
 
+	// todo mattthey add info about using shards
 	if _, err = q.cli.Put(ctx, twoPhaseCommitLeasePath(txId), txId, clientv3.WithLease(leaseResp.ID)); err != nil {
 		return -1, err
 	}
@@ -1688,7 +1689,7 @@ func (q *EtcdQDB) NextVal(ctx context.Context, seqName string) (int64, error) {
 	return nextval, err
 }
 
-func (q *EtcdQDB) GetWatcher(ctx context.Context, keyPrefix string) (Watcher, error) {
+func (q *EtcdQDB) GetWatcher() (Watcher, error) {
 	return NewEtcdWatcher(q.cli), nil
 }
 

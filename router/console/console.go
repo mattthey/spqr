@@ -102,7 +102,7 @@ func (l *LocalInstanceConsole) ProcessQuery(ctx context.Context, q string, rc rc
 		coordAddr, err := l.entityMgr.GetCoordinator(ctx)
 		if err != nil {
 			return err
-		} // создается клиент для координатора
+		}
 		conn, err := grpc.NewClient(coordAddr, grpc.WithInsecure()) //nolint:all
 		if err != nil {
 			return err

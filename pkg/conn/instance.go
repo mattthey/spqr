@@ -217,7 +217,7 @@ func NewInstanceConn(host string, availabilityZone string, shardname string, tls
 		Timeout:   timeout,
 		KeepAlive: keepAlive,
 
-		// Control: setTCPUserTimeout(tcpUserTimeout),
+		Control: setTCPUserTimeout(tcpUserTimeout),
 	}
 
 	// assuming here host is in the form of hostname:port

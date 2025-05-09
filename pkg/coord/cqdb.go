@@ -2122,7 +2122,7 @@ func (qc *QDBCoordinator) processWatchEvent(ctx context.Context, event *qdb.Watc
 	}
 
 	// todo mattthey use constants
-	if status == "committed---" {
+	if status == "committed" {
 		if err := qc.db.Delete2PhaseCommit(ctx, txid); err != nil {
 			spqrlog.Zero.Error().Err(err).Msg("failed to delete 2-phase commit")
 		}

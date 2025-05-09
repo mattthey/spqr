@@ -2,10 +2,7 @@ package twopc
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"github.com/pg-sharding/spqr/pkg/models/topology"
-
 	"github.com/jackc/pgx/v5/pgproto3"
 	"github.com/pg-sharding/spqr/pkg/coord"
 	"github.com/pg-sharding/spqr/pkg/shard"
@@ -86,8 +83,51 @@ func ExecuteTwoPhaseCommit(clid uint, s server.Server, qdb qdb.QDB) error {
 	return nil
 }
 
-func FinishTwoPhaseCommit(txid string, status string, shards []*topology.DataShard, qdb qdb.QDB) error {
-	return errors.New("not implemented yet")
+func FinishTwoPhaseCommit(txid string, status string, shards *[]string, qdb qdb.QDB) error {
+	// Update the 2PC commit status in QDB
+	err := update2PCCommit(qdb, txid, status)
+	if err != nil {
+		return fmt.Errorf("failed to update 2PC commit status: %v", err)
+	}
+
+	//// Create a fake client for executing the query
+	//fakeClient := client.NewFakeClient()
+	//
+	//// Create a pool manager for managing connections
+	//poolMgr := poolmgr.NewTxConnManager()
+	//
+	//// Create a relay state for executing queries
+	//relayState := relay.NewRelayState(qr, fakeClient, poolMgr)
+	//
+	//// For each shard, execute the appropriate commit/rollback command
+	//for _, sh := range *shards {
+	//	// Create a shard key for routing
+	//	shardKey := kr.ShardKey{
+	//		Name: sh,
+	//	}
+	//
+	//	// Create a route to the shard
+	//	err = relayState.RerouteToTargetRoute(&shardKey)
+	//	if err != nil {
+	//		return fmt.Errorf("failed to route to shard %s: %v", sh, err)
+	//	}
+	//
+	//	// Execute COMMIT/ROLLBACK PREPARED based on status
+	//	query := &pgproto3.Query{
+	//		String: fmt.Sprintf("%s PREPARED '%s'", status, txid),
+	//	}
+	//
+	//	// Add the query to the relay state
+	//	relayState.AddQuery(query)
+	//
+	//	// Execute the query
+	//	err = relayState.ProcessMessage(query, true, true)
+	//	if err != nil {
+	//		return fmt.Errorf("failed to execute %s on shard %s: %v", status, sh, err)
+	//	}
+	//}
+
+	return nil
 }
 
 // todo mattthey extract adapter to main method

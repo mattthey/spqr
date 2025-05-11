@@ -16,7 +16,6 @@ import (
 	protos "github.com/pg-sharding/spqr/pkg/protos"
 	"github.com/pg-sharding/spqr/pkg/shard"
 	"github.com/pg-sharding/spqr/pkg/startup"
-	"github.com/pg-sharding/spqr/pkg/tsa"
 	"github.com/pg-sharding/spqr/router/qrouter"
 	"github.com/pg-sharding/spqr/router/rulerouter"
 	"google.golang.org/grpc/reflection"
@@ -498,7 +497,7 @@ func (l *LocalQrouterServer) DropSequence(ctx context.Context, request *protos.D
 	return nil, err
 }
 
-func (l *LocalQrouterServer) Finish2PhaseCommit(ctx context.Context, request *protos.TwoPCCommit) (*emptypb.Empty, error) {
+func (l *LocalQrouterServer) Finish2PhaseCommit(ctx context.Context, request *protos.TwoPCRequest) (*emptypb.Empty, error) {
 	routerConfig := config.RouterConfig()
 	shardMapping := routerConfig.ShardMapping
 	startupParams := &startup.StartupParams{
@@ -511,59 +510,17 @@ func (l *LocalQrouterServer) Finish2PhaseCommit(ctx context.Context, request *pr
 		Name: "sh3",
 		RW:   true,
 	}
-	connectionWithTSA, err := dbPool.ConnectionWithTSA(0xFFFFFFFFFFFFFFFF, shardKey, tsa.TSA(config.TargetSessionAttrsAny))
+	connection, err := dbPool.Connection(0xFFFFFFFFFFFFFFFF, shardKey)
 	if err != nil {
 		return nil, err
 	}
-	defer connectionWithTSA.Close()
+	defer connection.Close()
 	// todo mattthey replace it to commit prepared or rollback
 	queryProto := &pgproto3.Query{String: "insert into orders(customer_id) values(777);"}
-	err = connectionWithTSA.Send(queryProto)
+	err = connection.Send(queryProto)
 	if err != nil {
 		return nil, err
 	}
-	//psqlClient := rclient.NewPsqlClient(nil, port.DefaultRouterPortType, string(routerConfig.Qr.DefaultRouteBehaviour), routerConfig.ShowNoticeMessages, routerConfig.DefaultTSA)
-
-	//// Call twopc.FinishTwoPhaseCommit to complete the transaction
-	//shardss := []string{"sh1"}
-	////err := twopc.FinishTwoPhaseCommit(request.Txid, request.ActualStatus, &shardss, l.mgr.QDB(), l.qr)
-	//
-	//// Create a fake client for executing the query
-	//fakeClient := routerClient.NewFakeClient()
-	//
-	//// Create a pool manager for managing connections
-	//poolMgr := poolmgr.NewTxConnManager()
-	//
-	//// Create a relay state for executing queries
-	//relayState := relay.NewRelayState(l.qr, fakeClient, poolMgr)
-	//
-	//// For each shard, execute the appropriate commit/rollback command
-	//for _, sh := range shardss {
-	//	// Create a shard key for routing
-	//	shardKey := kr.ShardKey{
-	//		Name: sh,
-	//	}
-	//
-	//	// Create a route to the shard
-	//	err := relayState.RerouteToTargetRoute(&shardKey)
-	//	if err != nil {
-	//		return nil, fmt.Errorf("failed to route to shard %s: %v", sh, err)
-	//	}
-	//
-	//	// Execute COMMIT/ROLLBACK PREPARED based on status
-	//	query := &pgproto3.Query{
-	//		String: fmt.Sprintf("commit PREPARED '%s'", request.Txid),
-	//	}
-	//
-	//	// Add the query to the relay state
-	//	relayState.AddQuery(query)
-	//
-	//	// Execute the query
-	//	err = relayState.ProcessMessage(query, true, true)
-	//	if err != nil {
-	//		return nil, fmt.Errorf("failed to execute %s on shard %s: %v", request.ActualStatus, sh, err)
-	//	}
-	//}
 
 	return &emptypb.Empty{}, nil
 }

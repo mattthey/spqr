@@ -2151,9 +2151,9 @@ func (qc *QDBCoordinator) processWatchEvent(ctx context.Context, event *qdb.Watc
 		defer cc.Close()
 
 		twoPCServiceClient := routerproto.NewTwoPCServiceClient(cc)
-		request := &routerproto.TwoPCCommit{
-			Txid:         txid,
-			ActualStatus: status,
+		request := &routerproto.TwoPCRequest{
+			Txid:   txid,
+			Status: status,
 		}
 		_, err = twoPCServiceClient.Finish2PhaseCommit(ctx, request)
 		if err != nil {

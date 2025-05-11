@@ -20,13 +20,13 @@ type TwoPCService struct {
 	impl coordinator.Coordinator
 }
 
-func (t TwoPCService) Create2PhaseCommit(context context.Context, request *protos.TwoPCRequest) (*protos.CreateTwoPCReply, error) {
+func (t TwoPCService) Create2PhaseCommit(context context.Context, request *protos.TwoPCRequest) (*protos.TwoPCReply, error) {
 	leaseId, err := t.impl.QDB().Create2PhaseCommitWithLease(context, request.Txid)
 	if err != nil {
 		return nil, err
 	}
 
-	return &protos.CreateTwoPCReply{
+	return &protos.TwoPCReply{
 		Lease: leaseId,
 	}, nil
 }

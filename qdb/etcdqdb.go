@@ -168,6 +168,7 @@ func (q *EtcdQDB) Update2PhaseCommit(ctx context.Context, txId string, status st
 		Str("status", status).
 		Msg("etcdqdb: two-phase-commit")
 
+	// todo fields should have (status, owner, shards, db, user, timestamp)
 	_, err := q.cli.Put(ctx, twoPhaseCommitPath(txId), status)
 
 	spqrlog.Zero.Debug().
@@ -177,6 +178,29 @@ func (q *EtcdQDB) Update2PhaseCommit(ctx context.Context, txId string, status st
 		Msg("etcdqdb: update 2 phase commit in qdb")
 
 	return err
+}
+
+func (q *EtcdQDB) testCompareAndSwap() {
+	key := "/example/key"
+	newValue := "updated_value"
+
+	// Perform a compare-and-swap operation
+	txnResp, err := q.cli.Txn(context.Background()).
+		If(clientv3.Compare(clientv3.Value(key), "=", "old_value")). // Check if the current value is "old_value"
+		Then(clientv3.OpPut(key, newValue)).                         // If true, update the value
+		Else(clientv3.OpGet(key)).                                   // If false, retrieve the current value
+		Commit()
+
+	if err != nil {
+		fmt.Println("Transaction failed:", err)
+		return
+	}
+
+	if txnResp.Succeeded {
+		fmt.Println("Value updated successfully!")
+	} else {
+		fmt.Println("Compare failed, current value:", string(txnResp.Responses[0].GetResponseRange().Kvs[0].Value))
+	}
 }
 
 func (q *EtcdQDB) Delete2PhaseCommit(ctx context.Context, txId string) error {

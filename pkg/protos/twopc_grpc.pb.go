@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	TwoPCService_Create2PhaseCommit_FullMethodName       = "/spqr.TwoPCService/Create2PhaseCommit"
+	TwoPCService_CreateLease_FullMethodName              = "/spqr.TwoPCService/CreateLease"
 	TwoPCService_Update2PhaseCommitStatus_FullMethodName = "/spqr.TwoPCService/Update2PhaseCommitStatus"
 	TwoPCService_Finish2PhaseCommit_FullMethodName       = "/spqr.TwoPCService/Finish2PhaseCommit"
 )
@@ -29,9 +30,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TwoPCServiceClient interface {
-	Create2PhaseCommit(ctx context.Context, in *TwoPCRequest, opts ...grpc.CallOption) (*CreateTwoPCReply, error)
+	Create2PhaseCommit(ctx context.Context, in *TwoPCRequest, opts ...grpc.CallOption) (*TwoPCReply, error)
+	CreateLease(ctx context.Context, in *TwoPCRequest, opts ...grpc.CallOption) (*TwoPCReply, error)
 	Update2PhaseCommitStatus(ctx context.Context, in *TwoPCRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	Finish2PhaseCommit(ctx context.Context, in *TwoPCCommit, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Finish2PhaseCommit(ctx context.Context, in *TwoPCRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type twoPCServiceClient struct {
@@ -42,9 +44,18 @@ func NewTwoPCServiceClient(cc grpc.ClientConnInterface) TwoPCServiceClient {
 	return &twoPCServiceClient{cc}
 }
 
-func (c *twoPCServiceClient) Create2PhaseCommit(ctx context.Context, in *TwoPCRequest, opts ...grpc.CallOption) (*CreateTwoPCReply, error) {
-	out := new(CreateTwoPCReply)
+func (c *twoPCServiceClient) Create2PhaseCommit(ctx context.Context, in *TwoPCRequest, opts ...grpc.CallOption) (*TwoPCReply, error) {
+	out := new(TwoPCReply)
 	err := c.cc.Invoke(ctx, TwoPCService_Create2PhaseCommit_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *twoPCServiceClient) CreateLease(ctx context.Context, in *TwoPCRequest, opts ...grpc.CallOption) (*TwoPCReply, error) {
+	out := new(TwoPCReply)
+	err := c.cc.Invoke(ctx, TwoPCService_CreateLease_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +71,7 @@ func (c *twoPCServiceClient) Update2PhaseCommitStatus(ctx context.Context, in *T
 	return out, nil
 }
 
-func (c *twoPCServiceClient) Finish2PhaseCommit(ctx context.Context, in *TwoPCCommit, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *twoPCServiceClient) Finish2PhaseCommit(ctx context.Context, in *TwoPCRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, TwoPCService_Finish2PhaseCommit_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -73,9 +84,10 @@ func (c *twoPCServiceClient) Finish2PhaseCommit(ctx context.Context, in *TwoPCCo
 // All implementations must embed UnimplementedTwoPCServiceServer
 // for forward compatibility
 type TwoPCServiceServer interface {
-	Create2PhaseCommit(context.Context, *TwoPCRequest) (*CreateTwoPCReply, error)
+	Create2PhaseCommit(context.Context, *TwoPCRequest) (*TwoPCReply, error)
+	CreateLease(context.Context, *TwoPCRequest) (*TwoPCReply, error)
 	Update2PhaseCommitStatus(context.Context, *TwoPCRequest) (*emptypb.Empty, error)
-	Finish2PhaseCommit(context.Context, *TwoPCCommit) (*emptypb.Empty, error)
+	Finish2PhaseCommit(context.Context, *TwoPCRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedTwoPCServiceServer()
 }
 
@@ -83,13 +95,16 @@ type TwoPCServiceServer interface {
 type UnimplementedTwoPCServiceServer struct {
 }
 
-func (UnimplementedTwoPCServiceServer) Create2PhaseCommit(context.Context, *TwoPCRequest) (*CreateTwoPCReply, error) {
+func (UnimplementedTwoPCServiceServer) Create2PhaseCommit(context.Context, *TwoPCRequest) (*TwoPCReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create2PhaseCommit not implemented")
+}
+func (UnimplementedTwoPCServiceServer) CreateLease(context.Context, *TwoPCRequest) (*TwoPCReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateLease not implemented")
 }
 func (UnimplementedTwoPCServiceServer) Update2PhaseCommitStatus(context.Context, *TwoPCRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update2PhaseCommitStatus not implemented")
 }
-func (UnimplementedTwoPCServiceServer) Finish2PhaseCommit(context.Context, *TwoPCCommit) (*emptypb.Empty, error) {
+func (UnimplementedTwoPCServiceServer) Finish2PhaseCommit(context.Context, *TwoPCRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Finish2PhaseCommit not implemented")
 }
 func (UnimplementedTwoPCServiceServer) mustEmbedUnimplementedTwoPCServiceServer() {}
@@ -123,6 +138,24 @@ func _TwoPCService_Create2PhaseCommit_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TwoPCService_CreateLease_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TwoPCRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TwoPCServiceServer).CreateLease(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TwoPCService_CreateLease_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TwoPCServiceServer).CreateLease(ctx, req.(*TwoPCRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TwoPCService_Update2PhaseCommitStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TwoPCRequest)
 	if err := dec(in); err != nil {
@@ -142,7 +175,7 @@ func _TwoPCService_Update2PhaseCommitStatus_Handler(srv interface{}, ctx context
 }
 
 func _TwoPCService_Finish2PhaseCommit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TwoPCCommit)
+	in := new(TwoPCRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -154,7 +187,7 @@ func _TwoPCService_Finish2PhaseCommit_Handler(srv interface{}, ctx context.Conte
 		FullMethod: TwoPCService_Finish2PhaseCommit_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TwoPCServiceServer).Finish2PhaseCommit(ctx, req.(*TwoPCCommit))
+		return srv.(TwoPCServiceServer).Finish2PhaseCommit(ctx, req.(*TwoPCRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -169,6 +202,10 @@ var TwoPCService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Create2PhaseCommit",
 			Handler:    _TwoPCService_Create2PhaseCommit_Handler,
+		},
+		{
+			MethodName: "CreateLease",
+			Handler:    _TwoPCService_CreateLease_Handler,
 		},
 		{
 			MethodName: "Update2PhaseCommitStatus",

@@ -7,21 +7,19 @@ option go_package = "spqr/proto";
 import "google/protobuf/empty.proto";
 
 service TwoPCService {
-  rpc Create2PhaseCommit(TwoPCRequest) returns (CreateTwoPCReply) {};
+  rpc Create2PhaseCommit(TwoPCRequest) returns (TwoPCReply) {};
+  rpc CreateLease(TwoPCRequest) returns(TwoPCReply) {};
   rpc Update2PhaseCommitStatus(TwoPCRequest) returns(google.protobuf.Empty) {};
-  rpc Finish2PhaseCommit(TwoPCCommit) returns(google.protobuf.Empty) {};
+  rpc Finish2PhaseCommit(TwoPCRequest) returns(google.protobuf.Empty) {};
 }
 
 message TwoPCRequest {
   string txid = 1;
   string status = 2;
+  string db = 3;
+  repeated string shards = 4;
 }
 
-message CreateTwoPCReply {
+message TwoPCReply {
   int64 lease = 1;
-}
-
-message TwoPCCommit {
-  string txid = 1;
-  string actualStatus = 2;
 }
